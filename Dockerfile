@@ -1,7 +1,7 @@
 FROM nginxdemos/hello
 
-# # Modify NGINX html replacing "Hello World" title text to update image
-# RUN sed -i -e 's/Hello\ World/Replaced\ text/g' /usr/share/nginx/html/index.html
+# Modify NGINX html replacing "Hello World" title text to update image
+RUN sed -i -e 's/Hello\ World/Replaced\ text/g' /usr/share/nginx/html/index.html
 
 EXPOSE 80
 

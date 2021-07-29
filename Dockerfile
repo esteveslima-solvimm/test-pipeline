@@ -5,14 +5,18 @@ FROM nginxdemos/hello
 
 EXPOSE 80
 
-# After create the infrastructure, it's necessary to push the app image to ECR:
+
+
+
+
+# After create the infrastructure, it's necessary to push the app image to ECR. Follow the steps below to do it manually:
 # 1- Login:
 # docker login --username AWS --password $(aws ecr get-login-password --region <REGION> --profile <PROFILE>) <ECR_URI>
 # 2- Build:
-# docker build -t example_ecr_repository .
+# docker build -t <ECR_REPOSITORY_NAME> .
 # 3- Tag:
-# docker tag example_ecr_repository:latest <ECR_URI>:latest
+# docker tag <ECR_REPOSITORY_NAME>:latest <ECR_URI>:latest
 # 4- Push:
 # docker push <ECR_URI>:latest
 
-# Use the replace command to update image and try to push again, updating the service to force new deployment
+# Use the replace command to update image and try to push manually again to verify the changes(required to update the service to force new deployment)

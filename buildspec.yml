@@ -11,15 +11,15 @@ phases:
     commands:
       - echo build started on `date`
       - echo Building the Docker image...          
-      - docker build -t $APP_NAME:$IMAGE_TAG .
-      - docker tag $APP_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPOSITORY:$IMAGE_TAG      
+      - docker build -t $CONTAINER_NAME:$IMAGE_TAG .
+      - docker tag $CONTAINER_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPOSITORY:$IMAGE_TAG      
   post_build:
     commands:
       - echo post-build started on `date`
       - echo Pushing the Docker image...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPOSITORY:$IMAGE_TAG
       - echo Creating the imagedefinitions artifact for CodeDeploy...
-      - printf '[{"name":"%s","imageUri":"%s"}]' $APP_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPOSITORY:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPOSITORY:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
     files: imagedefinitions.json

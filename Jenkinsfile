@@ -22,7 +22,7 @@
 
 // declarative style...
 pipeline {
-    agent {label ''}            // restrict build to workers with this label
+    agent {label 'test-worker'}            // restrict build to workers with this label
 
     environment {               // create custom environment variables
         SOME_ENV_VAR = 'foo'
@@ -55,15 +55,15 @@ pipeline {
         }       
     }
 
-    // post {
+    // post {   // conditionally run scripts after stages            
     //     always {
-    //         // execute scripts independently from the results
+    //        
     //     }
     //     success {
-    //         // execute scripts when build succeeds
+    //        
     //     }
     //     failure {
-    //         // execute scripts when build fails
+    //        
     //     }
     // }
 }

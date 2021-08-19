@@ -1,3 +1,5 @@
+# Build definition with docker for AWS Code Pipeline
+
 version: 0.2
 
 phases:

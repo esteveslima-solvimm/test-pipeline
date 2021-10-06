@@ -52,10 +52,9 @@ pipeline {
                     if(ENVIRONMENT == 'dev' || (env.GITHUB_PR_SOURCE_BRANCH && env.GITHUB_PR_SOURCE_BRANCH.contains('hotfix')) ) {
                         sh "docker build -t ${APPLICATION}:latest ./application" 
                     } else {
-                        environment {
-                            DEV_ECR_REPOSITORY_NAME =   "${APPLICATION}-dev" // "${APPLICATION}-dev-repository"
-                            DEV_APPLICATION_VERSION =   "${env.GIT_PREVIOUS_COMMIT}"    // in case of using commit hash as tag version, get the last commit hash from develop branch 
-                        }
+                        env.DEV_ECR_REPOSITORY_NAME =   "${APPLICATION}-dev" // "${APPLICATION}-dev-repository"
+                        env.DEV_APPLICATION_VERSION =   "${env.GIT_PREVIOUS_COMMIT}"    // in case of using commit hash as tag version, get the last commit hash from develop branch                         
+                        
                         sh "docker pull ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
                         sh "docker tag ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${APPLICATION_VERSION} ${APPLICATION}:latest"
                     }

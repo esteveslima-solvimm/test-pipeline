@@ -76,7 +76,7 @@ pipeline {
             steps{
                 script{
                     if(ENVIRONMENT == 'prod' || ENVIRONMENT == 'dev') {
-                        sh "docker tag ${APPLICATION}:${APPLICATION_VERSION} ${ECR_URI}/${ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
+                        sh "docker tag ${APPLICATION}:latest ${ECR_URI}/${ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
                         sh "docker push ${ECR_URI}/${ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
                     }
                 }   

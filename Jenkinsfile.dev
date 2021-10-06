@@ -53,10 +53,10 @@ pipeline {
                         sh "docker build -t ${APPLICATION}:latest ./application" 
                     } else {
                         env.DEV_ECR_REPOSITORY_NAME =   "${APPLICATION}-dev" // "${APPLICATION}-dev-repository"
-                        env.DEV_APPLICATION_VERSION =   "${env.GIT_PREVIOUS_COMMIT}"    // in case of using commit hash as tag version, get the last commit hash from develop branch                         
+                        env.DEV_APPLICATION_VERSION =   sh(script: 'echo "$(git log --max-count 1 --skip 1 --format="%H")"', returnStdout: true).trim()    // in case of using commit hash as tag version, get the last commit hash from develop branch                         
                         
-                        sh "docker pull ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
-                        sh "docker tag ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${APPLICATION_VERSION} ${APPLICATION}:latest"
+                        sh "docker pull ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${DEV_APPLICATION_VERSION}"
+                        sh "docker tag ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${DEV_APPLICATION_VERSION} ${APPLICATION}:latest"
                     }
                 }  
                          

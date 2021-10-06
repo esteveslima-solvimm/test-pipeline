@@ -92,20 +92,20 @@ pipeline {
         }       
     }
 
-    post {                                                           
-        always {
-           // cleanup?
-           sh 'echo cleanup?'
-        }
-        success {
-           // notification messages(slack, email, etc)
-           sh 'notification messages(slack, email, etc)'
-        }
-        failure {
-           // notification messages(slack, email, etc)
-           sh 'notification messages(slack, email, etc)'
-        }
-    }
+    // post {                                                           
+    //     always {
+    //        // cleanup?
+    //        sh 'echo cleanup?'
+    //     }
+    //     success {
+    //        // notification messages(slack, email, etc)
+    //        sh 'notification messages(slack, email, etc)'
+    //     }
+    //     failure {
+    //        // notification messages(slack, email, etc)
+    //        sh 'notification messages(slack, email, etc)'
+    //     }
+    // }
 }
 
 

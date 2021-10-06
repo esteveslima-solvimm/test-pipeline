@@ -49,7 +49,7 @@ pipeline {
         stage('application: build'){
             steps{
                 script{
-                    if(ENVIRONMENT == 'dev' || (ENVIRONMENT == 'prod' && env.GITHUB_PR_SOURCE_BRANCH.contains('hotfix')) ) {
+                    if(ENVIRONMENT == 'dev' || (env.GITHUB_PR_SOURCE_BRANCH && env.GITHUB_PR_SOURCE_BRANCH.contains('hotfix')) ) {
                         sh "docker build -t ${APPLICATION}:latest ./application" 
                     } else {
                         sh "export DEV_ECR_REPOSITORY_NAME=${APPLICATION}-dev-repository"

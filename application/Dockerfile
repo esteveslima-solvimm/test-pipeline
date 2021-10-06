@@ -3,7 +3,7 @@ FROM nginxdemos/hello
 # Use this replace command to update image and try to push manually again to verify the changes(required to update the service to force new deployment)
 
 # Modify NGINX html replacing "Hello World" title text to update image
-RUN sed -i -e 's/Hello\ World/Replaced\ text/g' /usr/share/nginx/html/index.html
+RUN sed -i -e 's/Hello\ World/Replaced\ text\ app-modification/g' /usr/share/nginx/html/index.html
 
 EXPOSE 80
 

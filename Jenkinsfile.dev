@@ -1,0 +1,108 @@
+// ECS Build definition with docker for Jenkins
+// Considering that will run only on branches main|master|develop|release*
+// Repository topics must include "docker" 
+// other repository topics: application type(java, node, etc)?, domain
+
+pipeline {
+    agent {label 'test-worker'}                                        
+
+    // tools {}
+    // options {}
+
+    environment {                   
+        // Setup basic env variables        
+        APPLICATION             = env.GIT_URL.replaceFirst(/^.*\/([^\/]+?).git$/, '$1')             // application name is the repository name
+        ENVIRONMENT             = 'prod'//getEnvironmentName(branchName: env.GIT_BRANCH)                    // get environment name based on branch name(prod, develop, etc)
+        APPLICATION_VERSION     = env.GIT_COMMIT/* decide version based on repository latest tag, commit or SVN_REVISION? */
+
+        // Setup aws credentials with jenkins credentials
+        AWS_ACCESS_KEY_ID       = credentials('tests-aws-access-key-id')        // TODO: it should use different credentials for different accounts based also on the environment
+        AWS_SECRET_ACCESS_KEY   = credentials('tests-aws-secret-access-key')
+        AWS_DEFAULT_REGION      = 'us-west-1'//ENVIRONMENT == 'prod' ? 'sa-east-1' : 'us-east-1'
+        
+        // Setup infrastructure env variables
+        AWS_ACCOUNT_ID          = sh(script: 'echo "$(aws sts get-caller-identity --query Account --output text)"', returnStdout: true).trim()  // get account id with aws cli
+        ECR_URI                 = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+        ECR_REPOSITORY_NAME     = "${APPLICATION}-${ENVIRONMENT}"//"${APPLICATION}-${ENVIRONMENT}-repository"
+        ECS_SERVICE_NAME        = "${APPLICATION}-${ENVIRONMENT}"//"${APPLICATION}-${ENVIRONMENT}-service"
+        ECS_CLUSTER_NAME        = "${APPLICATION}-${ENVIRONMENT}"//"ecs-cluster-${ENVIRONMENT}"
+
+        // Setup build custom env variables
+
+        // Or make it mandatory to have a Dockerfile.test
+        // APPLICATION_TYPE        = /* get type from repository topics? */  // java, node, etc... // what if the application doesnt have test command(airflow?)?
+        // TEST_COMMAND            = // getTestCommand(applicationType: APPLICATION_TYPE) // get test command based on application type to run in docker container
+    }
+
+    stages{
+        stage('infrastructure: build'){ // move to a separate pipeline?
+            steps{                
+                // build application infrastructure with terraform
+            }
+        }
+        stage('application: prebuild'){
+            steps{                
+                sh 'aws --version'
+                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_URI}"    // expect to fail if the infrastructure(ecr) is not provisioned/ready
+            }
+        }
+        stage('application: build'){
+            steps{
+                script{
+                    if(ENVIRONMENT == 'dev' || (ENVIRONMENT == 'prod' && env.GITHUB_PR_SOURCE_BRANCH.contains('hotfix')) ) {
+                        sh "docker build -t ${APPLICATION}:latest ./application" 
+                    } else {
+                        sh "export DEV_ECR_REPOSITORY_NAME=${APPLICATION}-dev-repository"
+                        sh "export DEV_APPLICATION_VERSION=${env.GIT_PREVIOUS_COMMIT}"   // in case of using commit hash as tag version, get the last commit hash from develop branch 
+                        sh "docker pull ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
+                        sh "docker tag ${ECR_URI}/${DEV_ECR_REPOSITORY_NAME}:${APPLICATION_VERSION} ${APPLICATION}:latest"
+                    }
+                }  
+                         
+            }
+        }
+        stage('application: test'){ // Maybe make it mandatory to have a Dockerfile.test
+            steps{                
+                // sh "docker run -it --rm --name test-execution-container ${APPLICATION}:latest ${TEST_COMMAND}"   // run tests on container
+                // audit test results and fail the build in case of poor tests coverage(or if the test itself fails)
+                // audit code quality with a tool like sonar?
+            }
+        }
+        stage('application: publish'){
+            steps{
+                script{
+                    if(ENVIRONMENT == 'prod' || ENVIRONMENT == 'dev') {
+                        sh "docker tag ${APPLICATION}:${APPLICATION_VERSION} ${ECR_URI}/${ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
+                        sh "docker push ${ECR_URI}/${ECR_REPOSITORY_NAME}:${APPLICATION_VERSION}"
+                    }
+                }   
+                sh "docker tag ${APPLICATION}:latest ${ECR_URI}/${ECR_REPOSITORY_NAME}:latest"
+                sh "docker push ${ECR_URI}/${ECR_REPOSITORY_NAME}:latest"
+            }
+        }
+        stage('application: deploy'){
+            steps{                
+                sh "aws ecs update-service --cluster ${ECS_CLUSTER_NAME} --service ${ECS_SERVICE_NAME} --force-new-deployment"
+                // register route/dns for the new application in kong?             
+            }
+        }       
+    }
+
+    post {                                                           
+        always {
+           // cleanup?
+        }
+        success {
+           // notification messages(slack, email, etc)
+        }
+        failure {
+           // notification messages(slack, email, etc)
+        }
+    }
+}
+
+
+
+
+
+// PS.: Not using the same artifact from dev build to prod build due to hotfixes that might happen to be merged directly into main branch

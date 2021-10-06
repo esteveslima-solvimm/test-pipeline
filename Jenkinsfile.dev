@@ -13,7 +13,7 @@ pipeline {
         // Setup basic env variables        
         APPLICATION             = env.GIT_URL.replaceFirst(/^.*\/([^\/]+?).git$/, '$1')             // application name is the repository name
         ENVIRONMENT             = 'prod'//getEnvironmentName(branchName: env.GIT_BRANCH)                    // get environment name based on branch name(prod, develop, etc)
-        APPLICATION_VERSION     = env.GIT_COMMIT/* decide version based on repository latest tag, commit or SVN_REVISION? */
+        APPLICATION_VERSION     = env.GIT_COMMIT            // decide version based on repository latest tag, commit or SVN_REVISION? */
 
         // Setup aws credentials with jenkins credentials
         AWS_ACCESS_KEY_ID       = credentials('tests-aws-access-key-id')        // TODO: it should use different credentials for different accounts based also on the environment
@@ -88,17 +88,17 @@ pipeline {
         }       
     }
 
-    post {                                                           
-        always {
-           // cleanup?
-        }
-        success {
-           // notification messages(slack, email, etc)
-        }
-        failure {
-           // notification messages(slack, email, etc)
-        }
-    }
+    // post {                                                           
+    //     always {
+    //        // cleanup?
+    //     }
+    //     success {
+    //        // notification messages(slack, email, etc)
+    //     }
+    //     failure {
+    //        // notification messages(slack, email, etc)
+    //     }
+    // }
 }
 
 

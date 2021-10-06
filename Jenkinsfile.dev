@@ -48,6 +48,8 @@ pipeline {
         }
         stage('application: build'){
             steps{
+                sh "echo ${ENVIRONMENT} ${env.GITHUB_PR_SOURCE_BRANCH}"
+                sh "echo ${ENVIRONMENT == 'dev' || (env.GITHUB_PR_SOURCE_BRANCH && env.GITHUB_PR_SOURCE_BRANCH.contains('hotfix'))}"
                 script{
                     if(ENVIRONMENT == 'dev' || (env.GITHUB_PR_SOURCE_BRANCH && env.GITHUB_PR_SOURCE_BRANCH.contains('hotfix')) ) {
                         sh "docker build -t ${APPLICATION}:latest ./application" 

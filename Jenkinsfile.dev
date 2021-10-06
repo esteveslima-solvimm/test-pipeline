@@ -12,7 +12,7 @@ pipeline {
     environment {                   
         // Setup basic env variables        
         APPLICATION             = env.GIT_URL.replaceFirst(/^.*\/([^\/]+?).git$/, '$1')             // application name is the repository name
-        ENVIRONMENT             = 'prod'//getEnvironmentName(branchName: env.GIT_BRANCH)                    // get environment name based on branch name(prod, develop, etc)
+        ENVIRONMENT             = env.GIT_BRANCH //getEnvironmentName(branchName: env.GIT_BRANCH)                    // get environment name based on branch name(prod, develop, etc)
         APPLICATION_VERSION     = "${env.GIT_COMMIT}"            // decide version based on repository latest tag, commit or SVN_REVISION? */
 
         // Setup aws credentials with jenkins credentials
